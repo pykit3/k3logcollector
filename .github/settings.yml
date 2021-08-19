@@ -1,0 +1,6 @@
+_extends: gh-config
+
+repository:
+  description: Scan log files on local machine, collector all interested logs, and send to somewhere for display.
+  homepage: https://blog.openacid.com
+  topics: python, log
