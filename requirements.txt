@@ -1,0 +1,7 @@
+-r _building/requirements.txt
+
+k3ut>=0.1.15,<0.2
+k3cat>=0.1.0,<0.2
+k3log>=0.1.0,<0.2
+k3thread>=0.1.0,<0.2
+k3time>=0.1.0<0.2
