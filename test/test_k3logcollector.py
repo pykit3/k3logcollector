@@ -28,7 +28,7 @@ def is_first_line(line):
 
 
 def parse(log_str):
-    r = re.match("^\[(.+?),(.+?),(.+?),(.+?),(\d+?),(\w+?)]", log_str)
+    r = re.match(r"^\[(.+?),(.+?),(.+?),(.+?),(\d+?),(\w+?)]", log_str)
 
     time_str = r.group(1)
 
