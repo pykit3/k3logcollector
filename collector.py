@@ -54,31 +54,25 @@ def run(**kwargs):
     # -   `conf`:
     # the configuration of all log files to scan. Required.
     context = {
-        'node_id': kwargs['node_id'],
-        'node_ip': kwargs['node_ip'],
-        'send_log': kwargs['send_log'],
-
-        'conf': kwargs['conf'],
-
-        'cache_lock': threading.RLock(),
-
-        'cache': {},
-        'stat': {},
-
-        'queue': queue.Queue(1024 * 10),
+        "node_id": kwargs["node_id"],
+        "node_ip": kwargs["node_ip"],
+        "send_log": kwargs["send_log"],
+        "conf": kwargs["conf"],
+        "cache_lock": threading.RLock(),
+        "cache": {},
+        "stat": {},
+        "queue": queue.Queue(1024 * 10),
     }
 
     # strptime not thread safe, need to call it manually before
     # initiating any thread
     datetime.strptime("2011-04-05", "%Y-%m-%d")
 
-    for log_name in list(context['conf'].keys()):
-        context['cache'][log_name] = {}
-        context['stat'][log_name] = {}
+    for log_name in list(context["conf"].keys()):
+        context["cache"][log_name] = {}
+        context["stat"][log_name] = {}
 
-        k3thread.daemon(
-            scanner.scan,
-            args=(context, log_name))
+        k3thread.daemon(scanner.scan, args=(context, log_name))
 
     k3thread.daemon(cache_flusher.run, args=(context,))
 
@@ -88,6 +82,6 @@ def run(**kwargs):
         # actually it is not an error log, but normally we only report
         # error log, and we want to report this log even it is not
         # an error log.
-        logger.error('stat: %s' % context['stat'])
+        logger.error("stat: %s" % context["stat"])
 
         time.sleep(100)

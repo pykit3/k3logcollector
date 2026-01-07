@@ -19,20 +19,20 @@ def parse(log_str):
 
 
 conf = {
-    'front_error_log': {
-        'file_path': 'path/to/log/file/xxx.error.log',
-        'level': ['warn', 'error'],
-        'is_first_line': is_first_line,
-        'get_level': get_level,
-        'parse': parse,
+    "front_error_log": {
+        "file_path": "path/to/log/file/xxx.error.log",
+        "level": ["warn", "error"],
+        "is_first_line": is_first_line,
+        "get_level": get_level,
+        "parse": parse,
     },
 }
 
 kwargs = {
-    'node_id': '123abc',
-    'node_ip': '1.2.3.4',
-    'send_log': send_log,
-    'conf': conf,
+    "node_id": "123abc",
+    "node_ip": "1.2.3.4",
+    "send_log": send_log,
+    "conf": conf,
 }
 
 k3logcollector.run(**kwargs)

@@ -44,32 +44,29 @@ def flush_cache(log_cache, queue, merge):
 
 
 def one_flush(context):
-
-    for log_name in list(context['cache'].keys()):
-        log_cache = context['cache'][log_name]
-        log_stat = context['stat'][log_name]
-        merge = context['conf'][log_name].get("merge", True)
+    for log_name in list(context["cache"].keys()):
+        log_cache = context["cache"][log_name]
+        log_stat = context["stat"][log_name]
+        merge = context["conf"][log_name].get("merge", True)
 
         try:
-            flush_cache(log_cache, context['queue'], merge)
-            log_stat['flush_cache_error'] = None
+            flush_cache(log_cache, context["queue"], merge)
+            log_stat["flush_cache_error"] = None
 
         except Exception as e:
-            logger.exception('failed to flush cache of: %s, %s' %
-                             (log_name, repr(e)))
-            log_stat['flush_cache_error'] = repr(e)
+            logger.exception("failed to flush cache of: %s, %s" % (log_name, repr(e)))
+            log_stat["flush_cache_error"] = repr(e)
 
 
 def run(context):
     while True:
         start_time = time.time()
 
-        with context['cache_lock']:
+        with context["cache_lock"]:
             one_flush(context)
 
         time_used = time.time() - start_time
 
-        logger.info('flush at: %f, time used: %f' %
-                    (start_time, time_used))
+        logger.info("flush at: %f, time used: %f" % (start_time, time_used))
 
         time.sleep(1)

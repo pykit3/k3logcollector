@@ -17,9 +17,9 @@ dd = k3ut.dd
 this_base = os.path.dirname(__file__)
 
 standard_level = {
-    'ERROR': 'error',
-    'WARNING': 'warning',
-    'INFO': 'info',
+    "ERROR": "error",
+    "WARNING": "warning",
+    "INFO": "info",
 }
 
 
@@ -28,11 +28,11 @@ def is_first_line(line):
 
 
 def parse(log_str):
-    r = re.match('^\[(.+?),(.+?),(.+?),(.+?),(\d+?),(\w+?)]', log_str)
+    r = re.match("^\[(.+?),(.+?),(.+?),(.+?),(\d+?),(\w+?)]", log_str)
 
     time_str = r.group(1)
 
-    log_dt = k3time.parse(time_str, 'mysql')
+    log_dt = k3time.parse(time_str, "mysql")
     log_ts = int(time.mktime(log_dt.timetuple()))
 
     source_file = r.group(4)
@@ -40,20 +40,19 @@ def parse(log_str):
     level = standard_level[r.group(6)]
 
     log_info = {
-        'log_ts': log_ts,
-        'level': level,
-        'source_file': source_file,
-        'line_number': line_number,
+        "log_ts": log_ts,
+        "level": level,
+        "source_file": source_file,
+        "line_number": line_number,
     }
 
     return log_info
 
 
 class TestLogcollector(unittest.TestCase):
-
     def _clean(self):
         try:
-            os.unlink(os.path.join(this_base, 'test_log.out'))
+            os.unlink(os.path.join(this_base, "test_log.out"))
         except Exception as e:
             dd(repr(e))
 
@@ -64,14 +63,13 @@ class TestLogcollector(unittest.TestCase):
         self._clean()
 
     def log(self):
-        logger = k3log.make_logger(base_dir=this_base,
-                                     log_name='test_log')
+        logger = k3log.make_logger(base_dir=this_base, log_name="test_log")
 
         cnt = 1
         while True:
-            logger.info('info')
-            logger.warning('warn')
-            logger.error('error')
+            logger.info("info")
+            logger.warning("warn")
+            logger.error("error")
             time.sleep(0.001)
             cnt += 1
             if cnt > 100:
@@ -82,7 +80,7 @@ class TestLogcollector(unittest.TestCase):
             if k in log_str:
                 return k.lower()
         else:
-            return 'unknown'
+            return "unknown"
 
     def test_basic(self):
         log_entries = []
@@ -91,16 +89,16 @@ class TestLogcollector(unittest.TestCase):
             log_entries.append(log_entry)
 
         kwargs = {
-            'node_id': '123abc',
-            'node_ip': '1.2.3.4',
-            'send_log': send_log,
-            'conf': {
-                'my_test_log': {
-                    'file_path': os.path.join(this_base, 'test_log.out'),
-                    'level': ['error'],
-                    'get_level': self.get_level,
-                    'is_first_line': is_first_line,
-                    'parse': parse,
+            "node_id": "123abc",
+            "node_ip": "1.2.3.4",
+            "send_log": send_log,
+            "conf": {
+                "my_test_log": {
+                    "file_path": os.path.join(this_base, "test_log.out"),
+                    "level": ["error"],
+                    "get_level": self.get_level,
+                    "is_first_line": is_first_line,
+                    "parse": parse,
                 },
             },
         }
@@ -116,9 +114,9 @@ class TestLogcollector(unittest.TestCase):
         dd(log_cnt)
 
         self.assertEqual(100, log_cnt)
-        self.assertEqual('error', log_entries[0]['level'])
-        self.assertEqual('my_test_log', log_entries[0]['log_name'])
-        self.assertEqual('test_log.out', log_entries[0]['log_file'])
+        self.assertEqual("error", log_entries[0]["level"])
+        self.assertEqual("my_test_log", log_entries[0]["log_name"])
+        self.assertEqual("test_log.out", log_entries[0]["log_file"])
 
     def test_no_merge(self):
         log_entries = []
@@ -127,17 +125,17 @@ class TestLogcollector(unittest.TestCase):
             log_entries.append(log_entry)
 
         kwargs = {
-            'node_id': '123abc',
-            'node_ip': '1.2.3.4',
-            'send_log': send_log,
-            'conf': {
-                'my_test_log': {
-                    'file_path': os.path.join(this_base, 'test_log.out'),
-                    'level': ['error'],
-                    'get_level': self.get_level,
-                    'is_first_line': is_first_line,
-                    'parse': parse,
-                    'merge': False,
+            "node_id": "123abc",
+            "node_ip": "1.2.3.4",
+            "send_log": send_log,
+            "conf": {
+                "my_test_log": {
+                    "file_path": os.path.join(this_base, "test_log.out"),
+                    "level": ["error"],
+                    "get_level": self.get_level,
+                    "is_first_line": is_first_line,
+                    "parse": parse,
+                    "merge": False,
                 },
             },
         }
@@ -147,4 +145,4 @@ class TestLogcollector(unittest.TestCase):
         time.sleep(8)
 
         self.assertEqual(100, len(log_entries))
-        self.assertEqual('error', log_entries[0]['level'])
+        self.assertEqual("error", log_entries[0]["level"])
