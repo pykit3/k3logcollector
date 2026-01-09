@@ -1,7 +1,6 @@
 # k3logcollector
 
 [![Action-CI](https://github.com/pykit3/k3logcollector/actions/workflows/python-package.yml/badge.svg)](https://github.com/pykit3/k3logcollector/actions/workflows/python-package.yml)
-[![Build Status](https://travis-ci.com/pykit3/k3logcollector.svg?branch=master)](https://travis-ci.com/pykit3/k3logcollector)
 [![Documentation Status](https://readthedocs.org/projects/k3logcollector/badge/?version=stable)](https://k3logcollector.readthedocs.io/en/stable/?badge=stable)
 [![Package](https://img.shields.io/pypi/pyversions/k3logcollector)](https://pypi.org/project/k3logcollector)
 
