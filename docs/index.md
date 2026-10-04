@@ -41,7 +41,7 @@ conf = {
 }
 
 # Run the collector
-collector.run(node_ip="192.168.1.1", send_log=send_log, conf=conf)
+collector.run(node_id="node-1", node_ip="192.168.1.1", send_log=send_log, conf=conf)
 ```
 
 ## API Reference

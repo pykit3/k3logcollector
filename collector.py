@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 def run(**kwargs):
     # Following is all the valid keyword arguments.
+    # -   `node_id`:
+    # the id of this machine. Required.
+    #
     # -   `node_ip`:
     # the ip of this machine. Required.
     #
