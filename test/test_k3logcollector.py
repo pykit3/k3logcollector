@@ -8,6 +8,7 @@ import k3thread
 import k3time
 import k3ut
 
+import k3logcollector
 from k3logcollector import collector
 
 dd = k3ut.dd
@@ -78,6 +79,9 @@ class TestLogcollector(unittest.TestCase):
             if k in log_str:
                 return k.lower()
         return "unknown"
+
+    def test_run_is_exported(self):
+        self.assertIs(collector.run, k3logcollector.run)
 
     def test_basic(self):
         log_entries = []
