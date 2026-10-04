@@ -19,27 +19,29 @@ pip install k3logcollector
 ```python
 from k3logcollector import collector
 
+
 def send_log(log_entry):
     print(log_entry)
 
+
 # Configure log files to scan
 conf = {
-    'my_log': {
-        'file_path': '/var/log/myapp.log',
-        'is_first_line': lambda line: line.startswith('['),
-        'get_level': lambda log: 'error' if 'ERROR' in log else 'info',
-        'parse': lambda log: {
-            'log_ts': 1234567890,
-            'level': 'error',
-            'source_file': 'app.py',
-            'line_number': 42,
+    "my_log": {
+        "file_path": "/var/log/myapp.log",
+        "is_first_line": lambda line: line.startswith("["),
+        "get_level": lambda log: "error" if "ERROR" in log else "info",
+        "parse": lambda log: {
+            "log_ts": 1234567890,
+            "level": "error",
+            "source_file": "app.py",
+            "line_number": 42,
         },
-        'level': ['error', 'warning'],
+        "level": ["error", "warning"],
     }
 }
 
 # Run the collector
-collector.run(node_ip='192.168.1.1', send_log=send_log, conf=conf)
+collector.run(node_ip="192.168.1.1", send_log=send_log, conf=conf)
 ```
 
 ## API Reference

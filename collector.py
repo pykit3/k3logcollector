@@ -5,9 +5,8 @@ import time
 from datetime import datetime
 
 import k3thread
-from k3logcollector import cache_flusher
-from k3logcollector import scanner
-from k3logcollector import sender
+
+from k3logcollector import cache_flusher, scanner, sender
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +65,8 @@ def run(**kwargs):
 
     # strptime not thread safe, need to call it manually before
     # initiating any thread
-    datetime.strptime("2011-04-05", "%Y-%m-%d")
+    # The result is discarded, so it needs no timezone.
+    datetime.strptime("2011-04-05", "%Y-%m-%d")  # noqa: DTZ007
 
     for log_name in list(context["conf"].keys()):
         context["cache"][log_name] = {}
@@ -82,6 +82,6 @@ def run(**kwargs):
         # actually it is not an error log, but normally we only report
         # error log, and we want to report this log even it is not
         # an error log.
-        logger.error("stat: %s" % context["stat"])
+        logger.error(f"stat: {context['stat']}")
 
         time.sleep(100)

@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+
 import k3cat
 
 logger = logging.getLogger(__name__)
@@ -23,9 +24,9 @@ def build_entry(context, log_name, file_name, log_str, log_conf):
     try:
         log_info = log_conf["parse"](log_str)
 
-    except Exception as e:
-        logger.exception("failed to parse log: %s, %s, %s" % (log_name, log_str, repr(e)))
-        raise ParseLogError("faild to parse log: %s" % log_name)
+    except Exception:
+        logger.exception(f"failed to parse log: {log_name}, {log_str}")
+        raise ParseLogError(f"faild to parse log: {log_name}")
 
     log_entry.update(log_info)
 
@@ -82,8 +83,11 @@ def _iter_log(log_conf):
                 if len(log_lines) < 100:
                     log_lines.append(line)
 
-    except Exception as e:
-        logger.info("got exception: %s when iter lines of file: %s" % (repr(e), file_path))
+    except Exception as e:  # noqa: BLE001
+        # `k3cat` raises `NoData` when the file has no new data, and the user
+        # callback `is_first_line` may raise anything. Either error ends this
+        # pass, and `iter_log()` starts the next one.
+        logger.info(f"got exception: {e!r} when iter lines of file: {file_path}")
 
         if len(log_lines) > 0:
             yield "".join(log_lines)
@@ -91,8 +95,7 @@ def _iter_log(log_conf):
 
 def iter_log(log_conf):
     while True:
-        for log_str in _iter_log(log_conf):
-            yield log_str
+        yield from _iter_log(log_conf)
 
         time.sleep(1)
 
@@ -131,7 +134,7 @@ def scan(context, log_name):
             _scan(context, log_name)
 
         except Exception as e:
-            logger.exception("failed to scan log: %s, %s" % (log_name, repr(e)))
+            logger.exception(f"failed to scan log: {log_name}")
 
             context["stat"][log_name]["error"] = repr(e)
             time.sleep(1)

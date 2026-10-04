@@ -14,8 +14,8 @@ def enqueue_log_entry(ts_cache, queue):
     #     },
     #     ...
     # }
-    for _, source_file_cache in ts_cache.items():
-        for _, log_entry in source_file_cache.items():
+    for source_file_cache in ts_cache.values():
+        for log_entry in source_file_cache.values():
             queue.put(log_entry)
 
 
@@ -25,7 +25,7 @@ def flush_cache(log_cache, queue, merge):
         return
 
     if not merge:
-        for _, logs in log_cache.items():
+        for logs in log_cache.values():
             for entry in logs:
                 queue.put(entry)
     else:
@@ -54,7 +54,7 @@ def one_flush(context):
             log_stat["flush_cache_error"] = None
 
         except Exception as e:
-            logger.exception("failed to flush cache of: %s, %s" % (log_name, repr(e)))
+            logger.exception(f"failed to flush cache of: {log_name}")
             log_stat["flush_cache_error"] = repr(e)
 
 
@@ -67,6 +67,6 @@ def run(context):
 
         time_used = time.time() - start_time
 
-        logger.info("flush at: %f, time used: %f" % (start_time, time_used))
+        logger.info(f"flush at: {start_time:f}, time used: {time_used:f}")
 
         time.sleep(1)

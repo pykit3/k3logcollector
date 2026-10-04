@@ -1,6 +1,3 @@
-#!/usr/bin/env python2
-# coding: utf-8
-
 import os
 import re
 import time
@@ -10,6 +7,7 @@ import k3log
 import k3thread
 import k3time
 import k3ut
+
 from k3logcollector import collector
 
 dd = k3ut.dd
@@ -53,7 +51,7 @@ class TestLogcollector(unittest.TestCase):
     def _clean(self):
         try:
             os.unlink(os.path.join(this_base, "test_log.out"))
-        except Exception as e:
+        except OSError as e:
             dd(repr(e))
 
     def setUp(self):
@@ -79,8 +77,7 @@ class TestLogcollector(unittest.TestCase):
         for k in standard_level:
             if k in log_str:
                 return k.lower()
-        else:
-            return "unknown"
+        return "unknown"
 
     def test_basic(self):
         log_entries = []
