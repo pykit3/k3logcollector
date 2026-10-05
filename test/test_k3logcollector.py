@@ -3,6 +3,7 @@ import re
 import time
 import unittest
 
+import k3cat
 import k3log
 import k3thread
 import k3time
@@ -50,10 +51,17 @@ def parse(log_str):
 
 class TestLogcollector(unittest.TestCase):
     def _clean(self):
-        try:
-            os.unlink(os.path.join(this_base, "test_log.out"))
-        except OSError as e:
-            dd(repr(e))
+        for log_name in ("test_log", "test_log_no_merge"):
+            log_path = os.path.join(this_base, log_name + ".out")
+            # k3cat saves the read offset of each file under /tmp and trusts it
+            # while the inode matches, so a record from an earlier run can make
+            # the scanner skip new lines.
+            offset_path = k3cat.Cat(log_path).stat_path()
+            for p in (log_path, offset_path):
+                try:
+                    os.unlink(p)
+                except OSError as e:
+                    dd(repr(e))
 
     def setUp(self):
         self._clean()
@@ -61,8 +69,8 @@ class TestLogcollector(unittest.TestCase):
     def tearDown(self):
         self._clean()
 
-    def log(self):
-        logger = k3log.make_logger(base_dir=this_base, log_name="test_log")
+    def log(self, log_name="test_log"):
+        logger = k3log.make_logger(base_dir=this_base, log_name=log_name)
 
         cnt = 1
         while True:
@@ -131,7 +139,7 @@ class TestLogcollector(unittest.TestCase):
             "send_log": send_log,
             "conf": {
                 "my_test_log": {
-                    "file_path": os.path.join(this_base, "test_log.out"),
+                    "file_path": os.path.join(this_base, "test_log_no_merge.out"),
                     "level": ["error"],
                     "get_level": self.get_level,
                     "is_first_line": is_first_line,
@@ -141,7 +149,9 @@ class TestLogcollector(unittest.TestCase):
             },
         }
 
-        k3thread.daemon(self.log)
+        # Use a log file of its own, because the collector threads of test_basic
+        # never stop and would take the lines of a shared file.
+        k3thread.daemon(self.log, args=("test_log_no_merge",))
         k3thread.daemon(collector.run, kwargs=kwargs)
         time.sleep(8)
 
