@@ -69,7 +69,7 @@ def run(**kwargs):
     # strptime not thread safe, need to call it manually before
     # initiating any thread
     # The result is discarded, so it needs no timezone.
-    datetime.strptime("2011-04-05", "%Y-%m-%d")  # noqa: DTZ007
+    datetime.strptime("2011-04-05", "%Y-%m-%d")
 
     for log_name in list(context["conf"].keys()):
         context["cache"][log_name] = {}
