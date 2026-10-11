@@ -2,6 +2,8 @@ import os
 import re
 import time
 import unittest
+from types import SimpleNamespace
+from unittest import mock
 
 import k3cat
 import k3log
@@ -10,7 +12,7 @@ import k3time
 import k3ut
 
 import k3logcollector
-from k3logcollector import collector
+from k3logcollector import cache_flusher, collector, scanner
 
 dd = k3ut.dd
 
@@ -157,3 +159,61 @@ class TestLogcollector(unittest.TestCase):
 
         self.assertEqual(100, len(log_entries))
         self.assertEqual("error", log_entries[0]["level"])
+
+
+class TestCache(unittest.TestCase):
+    def test_put_into_cache_counts_repeated_lines(self):
+        # Lines from the same source line in the same second merge into the
+        # latest entry, which counts them.
+        cache = {}
+        first = {"log_ts": 10, "source_file": "a.py", "line_number": 3, "count": 1, "content": "1"}
+        second = {"log_ts": 10, "source_file": "a.py", "line_number": 3, "count": 1, "content": "2"}
+        other = {"log_ts": 10, "source_file": "a.py", "line_number": 4, "count": 1, "content": "3"}
+        for entry in (first, second, other):
+            scanner.put_into_cache(cache, entry)
+
+        want = {
+            10: {
+                "a.py": {
+                    3: {"log_ts": 10, "source_file": "a.py", "line_number": 3, "count": 2, "content": "2"},
+                    4: {"log_ts": 10, "source_file": "a.py", "line_number": 4, "count": 1, "content": "3"},
+                }
+            }
+        }
+        self.assertEqual(want, cache)
+
+    def test_flush_cache_in_ts_order(self):
+        cache = {ts: {"a.py": {1: f"a{ts}"}, "b.py": {2: f"b{ts}"}} for ts in (104, 100, 102, 101, 103)}
+        queued = []
+        with mock.patch("time.time", return_value=200):
+            cache_flusher.flush_cache(cache, SimpleNamespace(put=queued.append), merge=True)
+
+        want = ["a100", "b100", "a101", "b101", "a102", "b102", "a103", "b103", "a104", "b104"]
+        self.assertEqual(want, queued)
+        self.assertEqual({}, cache)
+
+    def test_flush_cache_two_second_boundary(self):
+        # The latest bucket stays in the cache while it is less than 2 seconds
+        # old, because more lines of that second may still come.
+        cases = (
+            (101.9, ["e99"], {100: {"a.py": {1: "e100"}}}),
+            (102, ["e99", "e100"], {}),
+        )
+        for now, want_queued, want_cache in cases:
+            cache = {99: {"a.py": {1: "e99"}}, 100: {"a.py": {1: "e100"}}}
+            queued = []
+            with mock.patch("time.time", return_value=now):
+                cache_flusher.flush_cache(cache, SimpleNamespace(put=queued.append), merge=True)
+
+            self.assertEqual(want_queued, queued, now)
+            self.assertEqual(want_cache, cache, now)
+
+    def test_flush_cache_no_merge(self):
+        # Without merge, the cache maps a source file to its entries, and a
+        # flush sends all of them.
+        cache = {"a.py": ["a1", "a2"], "b.py": ["b1"]}
+        queued = []
+        cache_flusher.flush_cache(cache, SimpleNamespace(put=queued.append), merge=False)
+
+        self.assertEqual(["a1", "a2", "b1"], queued)
+        self.assertEqual({}, cache)
