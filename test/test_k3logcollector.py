@@ -192,6 +192,16 @@ class TestCache(unittest.TestCase):
         self.assertEqual(want, queued)
         self.assertEqual({}, cache)
 
+    def test_flush_cache_keeps_newest_5_ts(self):
+        # A flush queues the newest 5 buckets and drops the older ones.
+        cache = {ts: {"a.py": {1: f"e{ts}"}} for ts in range(100, 110)}
+        queued = []
+        with mock.patch("time.time", return_value=200):
+            cache_flusher.flush_cache(cache, SimpleNamespace(put=queued.append), merge=True)
+
+        self.assertEqual(["e105", "e106", "e107", "e108", "e109"], queued)
+        self.assertEqual({}, cache)
+
     def test_flush_cache_two_second_boundary(self):
         # The latest bucket stays in the cache while it is less than 2 seconds
         # old, because more lines of that second may still come.

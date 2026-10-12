@@ -16,6 +16,11 @@ Normally, same error info will be loged repeatedly, we do not want
 to save duplicated log info, so logs produced by same source file at
 same line number in one second will be combined.
 
+Each flush, once per second, sends only the logs of the newest 5 timestamps
+and drops older ones, unless the log's conf sets `merge` to `False`. So a
+backlog, such as the 2 MB that the scanner reads back when it starts, does not
+keep the sender behind.
+
 #   Conf
 
 configuration for log files. It is a dict, the key is the log name, the value

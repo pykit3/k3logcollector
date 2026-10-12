@@ -20,6 +20,19 @@ def enqueue_log_entry(ts_cache, queue):
 
 
 def flush_cache(log_cache, queue, merge):
+    """
+    Move the cached log entries of one log file into ``queue``.
+
+    With ``merge``, the cache maps a timestamp to the entries of that second.
+    The newest bucket stays in the cache while it is less than 2 seconds old,
+    because more lines of that second may still come. Of the other buckets,
+    only the newest 5 are queued, and the rest are dropped. This is
+    deliberate: after a backlog, such as the 2 MB that the scanner reads back
+    when it starts, the sender gets the newest logs instead of falling further
+    behind.
+
+    Without ``merge``, every cached entry is queued.
+    """
     ts_list = list(log_cache.keys())
     if len(ts_list) == 0:
         return
